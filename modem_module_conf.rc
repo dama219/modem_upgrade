@@ -1,0 +1,27 @@
+on post-fs-data
+	mkdir /private/modem 0770 system system
+
+service modem_module_conf /vendor/bin/modem_module_conf
+	class main
+	user root
+	group radio netd inet misc log
+	oneshot
+
+service compatible_4G /vendor/bin/compatible_4G.sh
+	class main
+	user root
+	group radio inet misc log wakelock
+	capabilities BLOCK_SUSPEND NET_ADMIN NET_RAW
+	oneshot
+	disabled
+
+service ec20_usb /vendor/bin/ec20_usb
+	class main
+	user radio
+	group radio netd inet misc log wakelock
+	capabilities BLOCK_SUSPEND NET_ADMIN NET_RAW
+	disabled
+
+on property:sys.modem_conf.complete=1
+	start compatible_4G
+	start ec20_usb
